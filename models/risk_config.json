@@ -1,0 +1,30 @@
+{
+  "project": "SIH 260170 Component Risk Engine",
+  "version": "1.0.0",
+  "description": "Configurable multi-factor risk assessment engine fusing Module A, Module B, and Safety Slope analysis.",
+  "weights": {
+    "anomaly_weight": 0.35,
+    "drift_projection_weight": 0.30,
+    "safety_slope_weight": 0.25,
+    "batch_deviation_weight": 0.10
+  },
+  "risk_thresholds": {
+    "normal_max": 35.0,
+    "watch_max": 70.0
+  },
+  "risk_levels": {
+    "NORMAL": "Component exhibits nominal thermal degradation within safe peer envelope. Approved for production.",
+    "WATCH": "Component shows moderate drift or minor peer outlier tendency. Recommended for extended screening / secondary audit.",
+    "HIGH_RISK": "Component exhibits hazardous kinetic drift or anomalous trajectory. High probability of latent defect escape. Immediate quarantine / reject."
+  },
+  "escalation_rules": {
+    "enable_critical_escalation": true,
+    "slope_breach_anomaly_threshold": 0.50,
+    "min_high_risk_score": 75.0,
+    "critical_slope_ratio_multiplier": 1.25
+  },
+  "sub_score_normalization": {
+    "batch_z_score_saturation_limit": 4.0,
+    "slope_ratio_saturation_limit": 2.0
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "module": "Module A - Threshold & False Negative Optimization",
+  "selected_threshold": 0.2365,
+  "selection_rule": {
+    "min_recall_constraint": 0.99,
+    "max_fpr_constraint": 0.02,
+    "objective": "Maximize F1 Score subject to safety-critical escape elimination",
+    "rationale": "Selected threshold meeting Recall >= 99.0% minimizing total asymmetric safety-critical mission cost."
+  },
+  "test_set_performance": {
+    "threshold": 0.2365,
+    "confusion_matrix": {
+      "tp": 146,
+      "tn": 1472,
+      "fp": 152,
+      "fn": 0
+    },
+    "recall": 1.0,
+    "precision": 0.489933,
+    "f1_score": 0.657658,
+    "false_negative_rate_fnr": 0.0,
+    "pr_auc": 0.99619,
+    "roc_auc": 0.999642,
+    "silent_escapes": 0,
+    "caught_defects": 146
+  },
+  "full_dataset_performance": {
+    "threshold": 0.2365,
+    "confusion_matrix": {
+      "tp": 1024,
+      "tn": 9126,
+      "fp": 1850,
+      "fn": 0
+    },
+    "recall": 1.0,
+    "precision": 0.356298,
+    "f1_score": 0.525398,
+    "false_negative_rate_fnr": 0.0,
+    "pr_auc": 0.973916,
+    "roc_auc": 0.997133,
+    "silent_escapes": 0,
+    "caught_defects": 1024
+  },
+  "special_sih_evaluation": {
+    "description": "Latent defects that pass traditional datasheet limit (<= 50 uA) but are detected by Module A at 24h",
+    "full_dataset": {
+      "total_latent_defects": 1024,
+      "defects_passing_datasheet_limit": 1024,
+      "defects_detected_by_module_a": 1024,
+      "defects_missed_by_module_a": 0,
+      "escape_recovery_percentage": 100.0
+    },
+    "test_split": {
+      "total_latent_defects": 146,
+      "defects_passing_datasheet_limit": 146,
+      "defects_detected_by_module_a": 146,
+      "defects_missed_by_module_a": 0,
+      "escape_recovery_percentage": 100.0
+    }
+  }
+}

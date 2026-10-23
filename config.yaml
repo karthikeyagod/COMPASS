@@ -1,0 +1,67 @@
+# ==============================================================================
+# SIH 260170 - Configuration Blueprint
+# Latent Defect Detection in Electronic Components during ESS
+# ==============================================================================
+
+project:
+  name: "sih-260170-latent-defect-detection"
+  version: "0.1.0"
+  phase: "Phase 0 - Project Architecture & Setup"
+  seed: 42
+
+paths:
+  data_dir: "data"
+  raw_data_dir: "data/raw"
+  processed_data_dir: "data/processed"
+  models_dir: "models"
+  logs_dir: "logs"
+
+ess_parameters:
+  screening_duration_hours: 168
+  sampling_rate_hz: 1.0
+  thermal_cycle:
+    temp_min_celsius: -40.0
+    temp_max_celsius: 125.0
+    ramp_rate_c_per_min: 5.0
+  vibration_profile:
+    frequency_min_hz: 20.0
+    frequency_max_hz: 2000.0
+    acceleration_g_rms: 6.0
+
+feature_engineering:
+  rolling_windows_seconds: [60, 300, 900]
+  enable_spectral_features: true
+  enable_slope_features: true
+
+models:
+  module_a_anomaly:
+    model_type: "isolation_forest"
+    contamination: 0.05
+    n_estimators: 150
+  
+  module_b_drift:
+    model_type: "gradient_boosting_regressor"
+    horizon_hours: 168
+    forecast_step_hours: 1
+
+safety_slope:
+  max_allowable_drift_slope: 0.005 # Units/hour
+  critical_slope_threshold: 0.012
+
+risk_engine:
+  weights:
+    anomaly_score: 0.40
+    drift_projection: 0.35
+    safety_slope_violation: 0.25
+  risk_thresholds:
+    low: 0.30
+    medium: 0.70
+    critical: 0.85
+
+api:
+  host: "0.0.0.0"
+  port: 8000
+  reload: false
+
+dashboard:
+  port: 8501

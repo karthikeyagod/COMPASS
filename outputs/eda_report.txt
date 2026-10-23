@@ -1,0 +1,153 @@
+================================================================================
+SIH PROBLEM STATEMENT 260170: EXPLORATORY DATA ANALYSIS & INSPECTION REPORT
+Title: Latent Defect Detection in Electronic Components during ESS
+================================================================================
+
+1. DATASET INTEGRITY & STRUCTURAL PROFILE
+--------------------------------------------------------------------------------
+* Dataset File Analyzed      : data/sih_260170_synthetic_ess_dataset.csv
+* Total Records (Rows)       : 12,000
+* Total Features (Columns)   : 19
+* Unique Components Tested   : 12,000
+* Unique Manufacturing Lots  : 60
+* Missing / Null Values      : 0 (0.00% across all columns)
+* Duplicate Records          : 0
+* Screening Temperature      : 125 °C (Accelerated Thermal Stress)
+* Dataset Splits             : Train = 8,533 (71.1%), Val = 1,697 (14.1%), Test = 1,770 (14.8%)
+
+Column Schema & Dtypes:
+Component_ID                      str
+Lot_ID                            str
+Temperature_C                   int64
+Value_0h_uA                   float64
+Value_24h_uA                  float64
+Value_96h_uA                  float64
+Value_168h_uA                 float64
+Iddq_0h_mA                    float64
+Iddq_24h_mA                   float64
+PropagationDelay_0h_ns        float64
+PropagationDelay_24h_ns       float64
+PropagationDelay_96h_ns       float64
+PropagationDelay_168h_ns      float64
+Latent_Defect                   int64
+Datasheet_Leakage_Limit_uA    float64
+Early_Drift_uA                float64
+Early_Drift_Rate_uA_per_h     float64
+Absolute_Limit_Pass             int64
+Split                             str
+
+
+2. CLASS BALANCE & TARGET DISTRIBUTIONS
+--------------------------------------------------------------------------------
+* Latent Defect Distribution:
+  - Class 0 (Healthy Components)    : 10,976 (91.47%)
+  - Class 1 (Latent Defect Present) : 1,024 (8.53%)
+  - Imbalance Ratio                 : ~ 10.7 : 1 (Healthy to Defective)
+
+* Absolute Limit Pass Distribution (Datasheet Limit = 50.0 uA):
+  - Pass (Value_168h <= 50.0 uA)    : 12,000 (100.00%)
+  - Fail (Value_168h > 50.0 uA)     : 0 (0.00%)
+
+
+3. CRITICAL SIH PROBLEM ANALYSIS: SCREENING ESCAPES
+--------------------------------------------------------------------------------
+Traditional manufacturing test criteria rely on static upper-specification limits
+(e.g., Value_168h_uA <= Datasheet_Leakage_Limit_uA = 50.0 uA).
+
+* Number of Latent-Defect Components                       : 1,024
+* Number of Latent Defects Passing Static Datasheet Limit : 1,024
+* Number of Latent Defects Caught by Static Limit         : 0
+* SCREENING ESCAPE RATE UNDER TRADITIONAL CRITERIA        : 100.00%
+
+EXPLANATION:
+Every single latent defect component (1,024 out of 1,024) registers a final 168h
+leakage current strictly below 50.0 uA (Max recorded defect leakage is 44.20 uA).
+Consequently, static-limit ATE (Automated Test Equipment) classifies 100% of these
+defective components as 'PASS'. These parts escape screening and are integrated into
+mission-critical systems, leading to early in-field failure.
+
+
+4. PARAMETRIC DRIFT KINETICS (HEALTHY VS LATENT DEFECT)
+--------------------------------------------------------------------------------
+Leakage Current Progression (Mean Values in uA):
+  Interval          Healthy (0)      Latent Defect (1)    Defect/Healthy Delta
+  ----------------------------------------------------------------------------
+  0h Baseline          10.0974 uA        10.0854 uA            -0.0120 uA
+  24h Screening        10.3832 uA        11.5269 uA            +1.1437 uA
+  96h Screening        11.3134 uA        18.5493 uA            +7.2359 uA
+  168h Completion      12.2717 uA        28.3508 uA           +16.0790 uA
+  ----------------------------------------------------------------------------
+  Total Drift Δ         2.1744 uA        18.2654 uA           +16.0910 uA
+
+Propagation Delay Progression (Mean Values in ns):
+  0h Baseline       : Healthy = 2.0007 ns | Defect = 1.9980 ns
+  24h Screening     : Healthy = 2.0259 ns | Defect = 2.1993 ns
+  168h Completion   : Healthy = 2.1165 ns | Defect = 3.3064 ns
+  Total Delay Drift : Healthy = +0.1158 ns | Defect = +1.3084 ns (+56.4% slowdown in defective ICs)
+
+Early Drift Rate (0h to 24h Slope):
+  - Healthy Components : Mean = 0.011911 uA/h (Std = 0.019670)
+  - Defect Components  : Mean = 0.060063 uA/h (Std = 0.029077)
+  - Ratio: Defective components exhibit a 5.04x higher drift velocity in the first 24 hours.
+
+
+5. NUMERICAL DESCRIPTIVE STATISTICS TABLE
+--------------------------------------------------------------------------------
+                              count        mean       std         min         25%         50%         75%         max
+Temperature_C               12000.0  125.000000  0.000000  125.000000  125.000000  125.000000  125.000000  125.000000
+Value_0h_uA                 12000.0   10.096336  1.172578    5.726200    9.289750   10.084850   10.896700   14.187800
+Value_24h_uA                12000.0   10.480806  1.321335    5.561200    9.582300   10.473600   11.358075   16.100300
+Value_96h_uA                12000.0   11.930867  2.576343    6.206500   10.423400   11.485100   12.663700   27.574800
+Value_168h_uA               12000.0   13.643792  5.033445    5.931100   11.138400   12.479950   13.998350   44.195400
+Iddq_0h_mA                  12000.0    5.210558  0.377226    3.597300    4.956200    5.212850    5.465000    6.652900
+Iddq_24h_mA                 12000.0    5.294428  0.398453    3.673900    5.022900    5.291200    5.556025    7.022900
+PropagationDelay_0h_ns      12000.0    2.000476  0.079596    1.639100    1.946800    2.001100    2.053200    2.310000
+PropagationDelay_24h_ns     12000.0    2.040678  0.096670    1.651600    1.976375    2.035500    2.095100    2.600400
+PropagationDelay_96h_ns     12000.0    2.116499  0.191350    1.686800    2.015100    2.076800    2.142100    3.197100
+PropagationDelay_168h_ns    12000.0    2.218068  0.352854    1.786900    2.063400    2.127900    2.195600    4.243600
+Latent_Defect               12000.0    0.085333  0.279389    0.000000    0.000000    0.000000    0.000000    1.000000
+Datasheet_Leakage_Limit_uA  12000.0   50.000000  0.000000   50.000000   50.000000   50.000000   50.000000   50.000000
+Early_Drift_uA              12000.0    0.384471  0.591278   -1.479700   -0.001650    0.334900    0.692850    3.853700
+Early_Drift_Rate_uA_per_h   12000.0    0.016020  0.024637   -0.061654   -0.000069    0.013954    0.028869    0.160571
+Absolute_Limit_Pass         12000.0    1.000000  0.000000    1.000000    1.000000    1.000000    1.000000    1.000000
+
+
+6. VISUALIZATION ARTIFACTS GENERATED
+--------------------------------------------------------------------------------
+All 8 plots have been rendered and saved in high resolution (300 DPI) under:
+outputs/eda/
+  1. 1_dist_value_0h.png                       - Overlapping 0h baseline leakage distribution
+  2. 2_dist_value_24h.png                      - Emerging early divergence at 24h
+  3. 3_dist_value_96h.png                      - Accelerated mid-cycle separation at 96h
+  4. 4_dist_value_168h.png                     - Bimodal 168h separation vs 50 uA datasheet limit
+  5. 5_healthy_vs_latent_defect_scatter.png    - Early drift rate vs 168h degradation
+  6. 6_timeseries_trajectories.png             - Spaghetti time-series trajectories (0h -> 168h)
+  7. 7_lot_level_distribution.png              - Lot-to-lot defect prevalence & parameter variations
+  8. 8_value_168h_vs_datasheet_limit.png       - 100% silent screening escape quadrant visualization
+
+
+7. CONCLUSION & WHAT THE DATA TELLS US ABOUT THE SIH PROBLEM
+--------------------------------------------------------------------------------
+1. ZERO-HOUR INVISIBILITY:
+   At t=0h, defective components are physically indistinguishable from healthy components
+   across all static tests (Leakage: 10.09 uA vs 10.08 uA; Propagation Delay: 2.00 ns vs 2.00 ns).
+   Zero-hour static tests CANNOT catch latent defects.
+
+2. STATIC LIMIT INADEQUACY:
+   The static datasheet threshold (50.0 uA) is set too conservatively high for component-level
+   deviations. Even after 168 hours of accelerated stress, the worst defective IC reached only
+   44.20 uA. Hence, static thresholding causes 100% screening escapes.
+
+3. TEMPORAL DYNAMICS & SLOPE AS THE SMOKING GUN:
+   The defect manifests as an ACCELERATING PARAMETRIC DRIFT over time.
+   Specifically, within the first 24 hours, the drift rate (Early_Drift_Rate_uA_per_h)
+   is already 5.04x higher in defective ICs (0.0600 uA/h vs 0.0119 uA/h).
+   Propagation delay also starts to degrade early (+0.201 ns at 24h, reaching +1.308 ns at 168h).
+
+4. IMPLICATIONS FOR ML ARCHITECTURE (PHASE 2 & BEYOND):
+   - Multi-parameter dynamic drift analysis (Module A: Anomaly Detection + Module B: Drift Forecasting)
+     is strictly necessary.
+   - Using delta features (Value_24h - Value_0h, Early_Drift_Rate, Delay_Shift) will allow early defect
+     detection as early as 24h, reducing screening test time from 168h down to 24h while eliminating
+     silent escapes.
+================================================================================

@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>COMPASS &bull; Component Anomaly Screening and Surveillance &bull; SIH 260170 QA Command Center</title>
+  <meta name="description" content="COMPASS: Component Anomaly Screening and Surveillance — Engineering-grade early latent defect detection, 168h drift forecasting, and safety slope compliance console for Environmental Stress Screening (ESS) quality assurance.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <!-- Chart.js for high performance reactive graphs -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="/index.css">
+</head>
+<body>
+
+  <!-- Top Workstation Header -->
+  <header class="app-header">
+    <div class="header-brand">
+      <div class="brand-logo">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="4" y="4" width="16" height="16" rx="2" stroke="currentColor"/>
+          <rect x="9" y="9" width="6" height="6" fill="currentColor" fill-opacity="0.3"/>
+          <path d="M9 1v3M15 1v3M9 20v3M15 20v3M1 9h3M1 15h3M20 9h3M20 15h3"/>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <h1>COMPASS <span class="badge-tag">SIH 260170 Command Center</span></h1>
+        <p class="brand-subtitle">Component Anomaly Screening and Surveillance &bull; Model-Assisted Reliability Screening</p>
+      </div>
+    </div>
+
+    <nav class="header-nav">
+      <a href="#commandCenter" class="nav-link">Overview</a>
+      <a href="#trustLayerSection" class="nav-link">Data Trust</a>
+      <a href="#batchAnalytics" class="nav-link">Batch Lots</a>
+      <a href="#componentAnalysis" class="nav-link">Telemetry Grid</a>
+      <a href="#trajectoryPlotSection" class="nav-link">Trajectory &amp; XAI</a>
+    </nav>
+
+    <div class="header-actions">
+      <div class="status-indicator" id="systemStatus">
+        <span class="status-dot"></span>
+        <span class="status-label">Engine: Operational</span>
+      </div>
+      <div class="screening-mode-pill">
+        <span>Screening:</span>
+        <span class="highlight">24h Early Window</span>
+      </div>
+      <button class="btn-secondary" id="refreshDataBtn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+        </svg>
+        Refresh
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content Layout -->
+  <main class="dashboard-container">
+
+    <!-- Analysis Mode Switcher Bar -->
+    <div class="mode-switcher-bar">
+      <span class="mode-title">Active Mode:</span>
+      <label class="radio-label">
+        <input type="radio" name="analysisMode" id="modeSihDemo" value="SIH_DEMO" checked>
+        <span>Existing SIH Benchmark Dataset (12,000 ICs)</span>
+      </label>
+      <label class="radio-label">
+        <input type="radio" name="analysisMode" id="modeUploadGeneric" value="UPLOAD_GENERIC">
+        <span>Upload Generic ESS Dataset</span>
+      </label>
+    </div>
+
+    <!-- Generic Upload & Profiling Section (Toggled in Upload mode) -->
+    <section class="section-block upload-section" id="uploadSection" style="display: none;">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">ESS Dataset Ingestion &amp; Profiling Engine</h2>
+          <p class="section-subtitle">Upload any ESS time-series CSV for automatic profiling, schema validation, and kinetic ML analysis</p>
+        </div>
+        <span class="badge-tag">Dynamic Ingestion</span>
+      </div>
+
+      <!-- Dropzone / File Picker -->
+      <div class="upload-dropzone" id="uploadDropzone">
+        <input type="file" id="csvFileInput" accept=".csv" style="display: none;">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#64748B" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+        <div class="dropzone-text">
+          <strong>Click to Choose CSV</strong> or drag &amp; drop an ESS dataset here
+        </div>
+        <div class="dropzone-subtext">Supported format: Standard or multi-channel ESS time-series CSV</div>
+        <div class="sample-dataset-actions">
+          <button type="button" class="btn-ghost" id="btnLoadCustomSample1">Load Sample: <code>Device_ID, Batch, Leak_0, Leak_24</code></button>
+          <button type="button" class="btn-ghost" id="btnLoadCustomSample2">Load Sample: Missing 96h</button>
+        </div>
+      </div>
+
+      <!-- Ingestion Pipeline Progress & Profile Cards (Appears after file selection) -->
+      <div class="ingestion-grid" id="ingestionProfileGrid" style="display: none;">
+        <!-- Step 1: Profile Card -->
+        <div class="ingestion-card" id="profileSummaryCard">
+          <h3 class="subsection-title">1. Dataset Profile</h3>
+          <div class="profile-stats-grid">
+            <div class="p-stat"><span>Components:</span> <strong id="profComponents">—</strong></div>
+            <div class="p-stat"><span>Lots:</span> <strong id="profLots">—</strong></div>
+            <div class="p-stat"><span>Rows:</span> <strong id="profRows">—</strong></div>
+            <div class="p-stat"><span>Columns:</span> <strong id="profCols">—</strong></div>
+            <div class="p-stat"><span>Parameter:</span> <strong id="profParam">Leakage Current</strong></div>
+            <div class="p-stat"><span>Temperature:</span> <strong id="profTemp">125°C</strong></div>
+            <div class="p-stat"><span>Static Limit:</span> <strong id="profLimit">50.0 µA</strong></div>
+          </div>
+          <div class="timepoints-section-wrap">
+            <span class="tp-group-label">Early Screening Inputs:</span>
+            <div class="timepoints-badge-row" id="profEarlyTimepoints">
+              <span class="tp-pill" id="tp0h">0h Baseline</span>
+              <span class="tp-pill" id="tp24h">24h Screening</span>
+            </div>
+            <span class="tp-group-label" style="margin-top: 6px;">Ground-Truth / Post-Burn-in Evaluation Data:</span>
+            <div class="timepoints-badge-row" id="profEvalTimepoints">
+              <span class="tp-pill" id="tp96h">96h Interim</span>
+              <span class="tp-pill" id="tp168h">168h Qualification</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2: Schema Mapping Card -->
+        <div class="ingestion-card" id="schemaMappingCard">
+          <h3 class="subsection-title">2. Schema Column Mapping</h3>
+          <div class="mapping-list" id="mappingList">
+            <!-- Dynamically populated rows -->
+          </div>
+        </div>
+
+        <!-- Step 3: Pipeline Readiness Card -->
+        <div class="ingestion-card" id="pipelineCompatibilityCard">
+          <h3 class="subsection-title">3. Model Suite Readiness</h3>
+          <div class="compatibility-list">
+            <div class="compat-item" id="compatModA">
+              <span>Module A (Dynamic Anomaly):</span> <strong>✓ Ready</strong>
+            </div>
+            <div class="compat-item" id="compatModB">
+              <span>Module B (168h Drift Prognostics):</span> <strong>✓ Ready</strong>
+            </div>
+            <div class="compat-item" id="compatSlope">
+              <span>Safety Slope Analysis:</span> <strong>✓ Ready</strong>
+            </div>
+          </div>
+          <button type="button" class="btn-primary" id="btnExecuteGenericAnalysis" style="width: 100%; margin-top: 12px; justify-content: center;">
+            Execute Screening Analysis
+          </button>
+        </div>
+      </div>
+
+      <!-- Incompatible Dataset Error Box -->
+      <div class="incompatible-dataset-box" id="incompatibleAlertBox" style="display: none;">
+        <div class="alert-text">
+          <strong>DATASET NOT COMPATIBLE</strong>
+          <p>Could not identify the required ESS time-series structure. Expected at least: Component identifier and early time-series measurements (0h and 24h).</p>
+        </div>
+        <button type="button" class="btn-secondary" id="btnRetryUpload">Select Another CSV</button>
+      </div>
+    </section>
+
+    <!-- ==================================================================== -->
+    <!-- DATA TRUST & INTEGRITY CONTROL -->
+    <!-- ==================================================================== -->
+    <section class="section-block security-trust-section" id="trustLayerSection">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">DATA TRUST &amp; INTEGRITY CONTROL</h2>
+          <p class="section-subtitle">Cryptographic Data Provenance, Structural Schema Validation &amp; Statistical Poisoning Shield</p>
+        </div>
+        <div class="trust-gate-pill-wrap">
+          <span class="trust-gate-badge gate-trusted" id="topTrustGateBadge">🟢 DATA TRUSTED &bull; ML ACCESS GRANTED</span>
+        </div>
+      </div>
+
+      <div class="trust-kpi-grid">
+        <!-- 1. Cryptographic Data Integrity -->
+        <div class="trust-card" id="cardIntegrity">
+          <div class="trust-card-header">
+            <span class="trust-card-title">1. Data Integrity</span>
+            <span class="status-pill pill-green" id="trustIntegrityBadge">✓ VERIFIED</span>
+          </div>
+          <div class="trust-card-body">
+            <div class="trust-prop-row">
+              <span>Algorithm:</span> <strong>SHA-256</strong>
+            </div>
+            <div class="trust-prop-row">
+              <span>Dataset Hash:</span> <strong class="hash-text" id="trustCurrentHash" title="Click to copy">—</strong>
+            </div>
+            <div class="trust-prop-row">
+              <span>Reference Hash:</span> <strong class="hash-text" id="trustRefHash">—</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Schema Integrity -->
+        <div class="trust-card" id="cardSchema">
+          <div class="trust-card-header">
+            <span class="trust-card-title">2. Schema Integrity</span>
+            <span class="status-pill pill-green" id="trustSchemaBadge">✓ VALID SCHEMA</span>
+          </div>
+          <div class="trust-card-body">
+            <div class="trust-prop-row">
+              <span>Fingerprint:</span> <strong class="hash-text" id="trustSchemaHash">—</strong>
+            </div>
+            <div class="trust-prop-row">
+              <span>Structure:</span> <strong id="trustStructureCols">—</strong>
+            </div>
+            <div class="trust-prop-row">
+              <span>Drift Status:</span> <strong class="highlight-green" id="trustSchemaStatus">—</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Tamper Detection -->
+        <div class="trust-card" id="cardTamper">
+          <div class="trust-card-header">
+            <span class="trust-card-title">3. Tamper Detection</span>
+            <span class="status-pill pill-green" id="trustTamperBadge">✓ PASSED</span>
+          </div>
+          <div class="trust-card-body">
+            <div class="trust-prop-row">
+              <span>Duplicate IDs:</span> <strong id="trustDupIds">—</strong>
+            </div>
+            <div class="trust-prop-row">
+              <span>Physical Range:</span> <strong id="trustPhysValid">—</strong>
+            </div>
+            <div class="trust-prop-row">
+              <span>Trajectory Checks:</span> <strong class="highlight-green" id="trustMonotonicity">—</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. AI Poisoning Detection -->
+        <div class="trust-card" id="cardPoison">
+          <div class="trust-card-header">
+            <span class="trust-card-title">4. Statistical Poisoning Check</span>
+            <span class="status-pill pill-green" id="trustPoisonBadge">✓ LOW RISK</span>
+          </div>
+          <div class="trust-card-body">
+            <div class="trust-prop-row">
+              <span>Poison Risk Score:</span> <strong class="highlight-green" id="trustPoisonScore">—</strong>
+            </div>
+            <div class="trust-prop-row">
+              <span>Robust MAD Outliers:</span> <strong id="trustOutliersCount">—</strong>
+            </div>
+            <div class="trust-prop-row">
+              <span>Population Shift:</span> <strong class="highlight-green" id="trustDistShift">—</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Trust Gate Decision Banner -->
+      <div class="trust-decision-banner banner-trusted" id="trustDecisionBanner">
+        <div class="trust-banner-icon" id="trustBannerIcon">🛡️</div>
+        <div class="trust-banner-content">
+          <div class="trust-banner-headline" id="trustBannerHeadline">DATA TRUST VERIFIED: FULL ML INFERENCE AUTHORIZED</div>
+          <div class="trust-banner-subtext" id="trustBannerSubtext">
+            Dataset cryptographic integrity, schema fingerprint, anti-tampering heuristics, and statistical distribution verified. Telemetry is safe for ML screening.
+          </div>
+        </div>
+        <div class="trust-banner-actions">
+          <button type="button" class="btn-ghost-sm" id="btnToggleAuditDrawer">🔍 View Audit Trail</button>
+        </div>
+      </div>
+
+      <!-- Expandable Audit Trail & Provenance Drawer -->
+      <div class="audit-drawer" id="auditDrawer" style="display: none;">
+        <div class="audit-drawer-inner">
+          <h3 class="subsection-title">Immutable Provenance &amp; Forensic Log</h3>
+          <div class="audit-grid-details">
+            <div class="audit-item"><span>Analysis Audit ID:</span> <strong id="audAnalysisId">ESS-AUDIT-2026-DEFAULT</strong></div>
+            <div class="audit-item"><span>Registration Timestamp:</span> <strong id="audTimestamp">—</strong></div>
+            <div class="audit-item"><span>Full SHA-256 Hash:</span> <code id="audFullHash" class="code-block-inline">—</code></div>
+            <div class="audit-item"><span>Reference SHA-256:</span> <code id="audRefHash" class="code-block-inline">—</code></div>
+            <div class="audit-item"><span>Schema Fingerprint:</span> <code id="audSchemaHash" class="code-block-inline">—</code></div>
+            <div class="audit-item"><span>Trust Gate Recommendation:</span> <strong id="audRecommendation">Dataset authorized for ML inference.</strong></div>
+          </div>
+          <div class="audit-issues-block" id="auditIssuesBlock" style="display: none;">
+            <span class="audit-issues-title">Detected Diagnostics &amp; Warnings:</span>
+            <ul id="auditIssuesList"></ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Test Harness & Resilience Sandbox -->
+      <div class="security-demo-sandbox">
+        <span class="sandbox-label">Test Harness &amp; Resilience Sandbox:</span>
+        <button type="button" class="btn-trust-sample" id="btnLoadCleanTrusted">Load Benchmark (Verified)</button>
+        <button type="button" class="btn-trust-sample btn-tamper-sample" id="btnLoadTamperedDemo">Load Tampered Test Sample</button>
+        <button type="button" class="btn-trust-sample btn-poison-sample" id="btnLoadPoisonedDemo">Load Poisoned Test Sample</button>
+      </div>
+    </section>
+
+    <!-- ==================================================================== -->
+    <!-- 1. SCREENING OVERVIEW & SUMMARY STATISTICS -->
+    <!-- ==================================================================== -->
+    <section class="section-block command-center-section" id="commandCenter">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">1. Screening Overview &amp; Batch Statistics</h2>
+          <p class="section-subtitle">125°C Environmental Stress Screening Parametric Telemetry Overview</p>
+        </div>
+        <div class="escape-recovery-badge">
+          <span>Silent Latent Escapes Prevented: <strong>100.0% (1,024 / 1,024 Caught)</strong></span>
+        </div>
+      </div>
+
+      <div class="kpi-grid">
+        <!-- Total Components -->
+        <div class="kpi-card">
+          <span class="kpi-label">Total Screened</span>
+          <div class="kpi-value" id="kpiTotalComponents">12,000</div>
+          <span class="kpi-subtext">Production Batch</span>
+        </div>
+
+        <!-- Normal / Passed -->
+        <div class="kpi-card">
+          <span class="kpi-label">Conforming (Pass)</span>
+          <div class="kpi-value highlight-green" id="kpiNormalCount">10,976</div>
+          <span class="kpi-subtext">91.5% Within Envelope</span>
+        </div>
+
+        <!-- Watchlist -->
+        <div class="kpi-card">
+          <span class="kpi-label">Watchlist (Monitor)</span>
+          <div class="kpi-value highlight-amber" id="kpiWatchCount">1</div>
+          <span class="kpi-subtext">Moderate Drift Velocity</span>
+        </div>
+
+        <!-- High Risk / Quarantined -->
+        <div class="kpi-card">
+          <span class="kpi-label">High Risk (Quarantine)</span>
+          <div class="kpi-value highlight-red" id="kpiHighRiskCount">1,024</div>
+          <span class="kpi-subtext">8.5% Latent Defect Intercepts</span>
+        </div>
+
+        <!-- Static Limit Failures -->
+        <div class="kpi-card">
+          <span class="kpi-label">Static Limit Failures</span>
+          <div class="kpi-value" id="kpiStaticFailCount">0</div>
+          <span class="kpi-subtext">Caught by Static 50 μA Limit</span>
+        </div>
+
+        <!-- Dynamic Safety Slope Detections -->
+        <div class="kpi-card">
+          <span class="kpi-label">Dynamic Slope Detections</span>
+          <div class="kpi-value highlight-blue" id="kpiDynamicDetections">1,024</div>
+          <span class="kpi-subtext">Flagged at 24h Early Stage</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Two-Column Primary Row: Batch Analytics & Live Component Tester -->
+    <div class="dashboard-grid-2col">
+
+      <!-- ==================================================================== -->
+      <!-- 2. MANUFACTURING LOT VARIANCE & DISTRIBUTION -->
+      <!-- ==================================================================== -->
+      <section class="section-block batch-analytics-section" id="batchAnalytics">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">2. Manufacturing Lot Variance &amp; Distribution</h2>
+            <p class="section-subtitle">Intra-lot peer statistics and population degradation drift velocity</p>
+          </div>
+          <div class="lot-picker-wrap">
+            <label for="lotSelector">Lot:</label>
+            <select id="lotSelector" class="form-select">
+              <option value="ALL">All Manufacturing Lots (Combined)</option>
+              <option value="LOT_001">LOT_001 (Wafer Fab 1)</option>
+              <option value="LOT_002">LOT_002</option>
+              <option value="LOT_003">LOT_003</option>
+              <option value="LOT_004">LOT_004</option>
+              <option value="LOT_005">LOT_005</option>
+              <option value="LOT_006">LOT_006</option>
+              <option value="LOT_007">LOT_007</option>
+              <option value="LOT_008">LOT_008</option>
+              <option value="LOT_009">LOT_009</option>
+              <option value="LOT_010">LOT_010</option>
+              <option value="LOT_011">LOT_011</option>
+              <option value="LOT_012">LOT_012</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="batch-metrics-table">
+          <div class="batch-stat-row">
+            <span class="stat-name">Lot Population Size:</span>
+            <span class="stat-val" id="batchPopSize">1,000 ICs</span>
+          </div>
+          <div class="batch-stat-row">
+            <span class="stat-name">Mean 0h Baseline Leakage:</span>
+            <span class="stat-val" id="batchMean0h">10.13 μA</span>
+          </div>
+          <div class="batch-stat-row">
+            <span class="stat-name">Mean 24h Measured Leakage:</span>
+            <span class="stat-val" id="batchMean24h">10.42 μA</span>
+          </div>
+          <div class="batch-stat-row">
+            <span class="stat-name">Lot Median (0h / 24h):</span>
+            <span class="stat-val" id="batchMedian">10.13 μA / 10.44 μA</span>
+          </div>
+          <div class="batch-stat-row">
+            <span class="stat-name">Intra-Lot Std Dev (σ):</span>
+            <span class="stat-val" id="batchStd">0.485 μA</span>
+          </div>
+          <div class="batch-stat-row">
+            <span class="stat-name">Nominal Drift Rate (Mean dI/dt):</span>
+            <span class="stat-val" id="batchMeanRate">0.0121 μA/h</span>
+          </div>
+          <div class="batch-stat-row">
+            <span class="stat-name">Latent Defects Identified:</span>
+            <span class="stat-val highlight-red" id="batchDefectCount">85 ICs (8.50%)</span>
+          </div>
+        </div>
+
+        <!-- Lot Health Distribution Bar -->
+        <div class="lot-health-bar-wrap">
+          <div class="bar-header">
+            <span>Lot Health Composition</span>
+            <span id="lotHealthPercent">91.5% Conforming</span>
+          </div>
+          <div class="stacked-bar">
+            <div class="bar-seg seg-green" id="barSegGreen" style="width: 91.5%;"></div>
+            <div class="bar-seg seg-amber" id="barSegAmber" style="width: 0.1%;"></div>
+            <div class="bar-seg seg-red" id="barSegRed" style="width: 8.4%;"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================================================================== -->
+      <!-- 3. LIVE COMPONENT TELEMETRY TESTER -->
+      <!-- ==================================================================== -->
+      <section class="section-block live-eval-section">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">3. Live Telemetry Diagnostic Tester</h2>
+            <p class="section-subtitle">Submit early-stage 0h &amp; 24h telemetry for real-time risk assessment</p>
+          </div>
+        </div>
+
+        <form id="liveEvalForm" class="eval-form-grid">
+          <div class="form-group">
+            <label for="inpCompId">Component ID</label>
+            <input type="text" id="inpCompId" class="form-input" value="IC_000006" required>
+          </div>
+          <div class="form-group">
+            <label for="inpLotId">Lot Identifier</label>
+            <input type="text" id="inpLotId" class="form-input" value="LOT_001" required>
+          </div>
+          <div class="form-group">
+            <label for="inpVal0h">0h Leakage (μA)</label>
+            <input type="number" step="any" id="inpVal0h" class="form-input" value="10.12" required>
+          </div>
+          <div class="form-group">
+            <label for="inpVal24h">24h Leakage (μA)</label>
+            <input type="number" step="any" id="inpVal24h" class="form-input" value="11.56" required>
+          </div>
+          <div class="form-group">
+            <label for="inpDelay0h">0h Propagation Delay (ns)</label>
+            <input type="number" step="any" id="inpDelay0h" class="form-input" value="2.015">
+          </div>
+          <div class="form-group">
+            <label for="inpDelay24h">24h Propagation Delay (ns)</label>
+            <input type="number" step="any" id="inpDelay24h" class="form-input" value="2.218">
+          </div>
+          <div class="form-submit-row">
+            <button type="submit" class="btn-primary" id="btnEvaluate">
+              Run Real-Time Diagnosis
+            </button>
+            <button type="button" class="btn-ghost" id="btnLoadSampleNormal">Load Nominal Sample</button>
+            <button type="button" class="btn-ghost" id="btnLoadSampleEscape">Load Escaping Defect</button>
+          </div>
+        </form>
+      </section>
+
+    </div>
+
+    <!-- ==================================================================== -->
+    <!-- 4. COMPONENT SCREENING DATA GRID (INTERACTIVE TABLE) -->
+    <!-- ==================================================================== -->
+    <section class="section-block component-grid-section" id="componentAnalysis">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">4. Component Screening Telemetry Grid</h2>
+          <p class="section-subtitle">Search, filter, and select a component record for deep trajectory and root-cause analysis</p>
+        </div>
+        <div class="grid-controls">
+          <input type="text" id="tableSearchInp" class="search-input" placeholder="Search by Component ID (e.g. IC_000006)...">
+          <div class="filter-pills">
+            <button class="pill-filter active" data-filter="ALL">All Components</button>
+            <button class="pill-filter filter-red" data-filter="HIGH_RISK">High Risk (Quarantine)</button>
+            <button class="pill-filter filter-amber" data-filter="WATCH">Watchlist</button>
+            <button class="pill-filter filter-green" data-filter="NORMAL">Conforming (Pass)</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-responsive-wrap">
+        <table class="data-table" id="componentsTable">
+          <thead>
+            <tr>
+              <th>Component ID</th>
+              <th>Lot ID</th>
+              <th>0h (μA)</th>
+              <th>24h (μA)</th>
+              <th>96h (μA)</th>
+              <th>168h Actual</th>
+              <th>Predicted 168h</th>
+              <th>Anomaly Score</th>
+              <th>Risk Score</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <!-- Populated reactively by app.js -->
+            <tr>
+              <td colspan="11" class="loading-cell">Loading screening records...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="table-footer-info">
+        <span id="showingCountText">Showing 15 of 12,000 components</span>
+        <div class="table-pagination">
+          <button class="btn-page" id="btnPrevPage" disabled>&larr; Previous</button>
+          <span class="page-indicator" id="pageIndicator">Page 1 of 800</span>
+          <button class="btn-page" id="btnNextPage">Next &rarr;</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Two-Column Dynamic Inspection Row: Trajectory Chart & Root-Cause Explanation Panel -->
+    <div class="dashboard-grid-2col inspection-row">
+
+      <!-- ==================================================================== -->
+      <!-- 5. THERMAL BURN-IN TRAJECTORY PLOT -->
+      <!-- ==================================================================== -->
+      <section class="section-block chart-section" id="trajectoryPlotSection">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">5. Thermal Burn-in Degradation Trajectory</h2>
+            <p class="section-subtitle">Parametric drift kinetics vs. calibrated safety envelope &amp; static limit</p>
+          </div>
+          <div class="inspected-chip">
+            Inspecting: <strong id="chipCompId">IC_000006</strong>
+          </div>
+        </div>
+
+        <div class="chart-container-wrap">
+          <canvas id="trajectoryChart"></canvas>
+        </div>
+
+        <div class="chart-legend-callout">
+          <div class="callout-item">
+            <span class="dot-legend dot-blue"></span>
+            <span>Measured Telemetry ($0\text{h} \to 24\text{h}$)</span>
+          </div>
+          <div class="callout-item">
+            <span class="dot-legend dot-red-dash"></span>
+            <span>Module B 168h Forecast ($24\text{h} \to 168\text{h}$)</span>
+          </div>
+          <div class="callout-item">
+            <span class="dot-legend dot-orange"></span>
+            <span>Healthy Degradation Envelope ($0.0371\,\mu\text{A}/\text{h}$)</span>
+          </div>
+          <div class="callout-item">
+            <span class="dot-legend dot-red-line"></span>
+            <span>Static Datasheet Limit ($50.0\,\mu\text{A}$)</span>
+          </div>
+        </div>
+
+        <div class="sih-insight-banner" id="sihInsightBanner">
+          <div class="banner-icon">ℹ️</div>
+          <div class="banner-text">
+            <strong>Engineering QA Note:</strong> This component reaches <strong>33.4 μA</strong> at 168h, remaining completely below the static <strong>50.0 μA</strong> datasheet limit and escaping traditional screening. However, at 24 hours its kinetic drift velocity was <strong>0.0912 μA/h</strong> (2.46x the safety slope), triggering an immediate early quarantine at $t=24\,\text{h}$.
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================================================================== -->
+      <!-- 6. ROOT-CAUSE DECISION EVIDENCE (XAI) -->
+      <!-- ==================================================================== -->
+      <section class="section-block explanation-section" id="explanationPanel">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">6. Root-Cause Decision Evidence (XAI)</h2>
+            <p class="section-subtitle">QA Diagnostic Justification &amp; Physical Attribution Breakdown</p>
+          </div>
+          <div class="status-pill pill-green" id="verdictBadge">NORMAL</div>
+        </div>
+
+        <!-- Executive Summary Verdict Box -->
+        <div class="ten-second-verdict-box box-green" id="tenSecVerdictBox">
+          <div class="verdict-header">
+            <span class="verdict-title" id="tenSecTitle">SCREENING VERDICT: CONFORMING &amp; HEALTHY</span>
+            <span class="verdict-score" id="tenSecScore">Risk Score: 10.3 / 100</span>
+          </div>
+          <p class="verdict-desc" id="tenSecDesc">
+            Component strictly conforms to healthy thermal degradation kinetics. Approved for flight-grade mission deployment.
+          </p>
+        </div>
+
+        <!-- 4 Human-Readable Diagnostic Reasons -->
+        <div class="reasons-block">
+          <h3 class="subsection-title">Decision Evidence &amp; Physical Attributions:</h3>
+          <ul class="reasons-list" id="reasonsList">
+            <li>Early leakage current increased by +1.44 μA (+14.2%) over the first 24 hours of burn-in.</li>
+            <li>Component deviates strongly from its manufacturing lot (LOT_001) median distribution (+3.48 sigma).</li>
+            <li>Predicted 168h leakage value (34.82 μA) indicates accelerated non-linear kinetic degradation.</li>
+            <li>Predicted degradation drift rate (0.0912 μA/h) breaches the healthy safety envelope (0.0371 μA/h) by 2.46x.</li>
+          </ul>
+        </div>
+
+        <!-- Top Physical Contributing Factors -->
+        <div class="top-factors-block">
+          <h3 class="subsection-title">Top Contributing Physical Factors:</h3>
+          <div class="factors-list" id="factorsList">
+            <div class="factor-row">
+              <span class="factor-name">Timing Drift Lot Peer Deviation (Robust Z-Score)</span>
+              <span class="factor-val">+12.57 sigma</span>
+            </div>
+            <div class="factor-row">
+              <span class="factor-name">Early Leakage Drift Velocity (dI/dt)</span>
+              <span class="factor-val">0.0600 μA/h</span>
+            </div>
+            <div class="factor-row">
+              <span class="factor-name">Quiescent Supply Current Shift</span>
+              <span class="factor-val">+0.150 mA</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Supporting Physical Telemetry Table -->
+        <div class="telemetry-table-block">
+          <h3 class="subsection-title">Supporting Physical Telemetry:</h3>
+          <div class="telemetry-grid" id="telemetryGrid">
+            <div class="telem-item">
+              <span class="t-lbl">0h Baseline:</span>
+              <span class="t-val" id="t0h">10.12 μA</span>
+            </div>
+            <div class="telem-item">
+              <span class="t-lbl">24h Interim:</span>
+              <span class="t-val" id="t24h">11.56 μA</span>
+            </div>
+            <div class="telem-item">
+              <span class="t-lbl">Early Delta:</span>
+              <span class="t-val" id="tDelta">+1.44 μA</span>
+            </div>
+            <div class="telem-item">
+              <span class="t-lbl">Drift Velocity:</span>
+              <span class="t-val" id="tRate">0.0600 μA/h</span>
+            </div>
+            <div class="telem-item">
+              <span class="t-lbl">Gate Delay:</span>
+              <span class="t-val" id="tDelay">2.015 ns</span>
+            </div>
+            <div class="telem-item">
+              <span class="t-lbl">Predicted 168h:</span>
+              <span class="t-val highlight-red" id="tPred168">34.82 μA</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Module B 168h Drift Prognostics & Evaluation Breakdown Card -->
+        <div class="module-b-breakdown-card" id="moduleBBreakdownCard">
+          <div class="card-header-flex">
+            <h3 class="subsection-title">Module B: 168h Drift Prognostics &amp; Evaluation</h3>
+            <span class="status-pill pill-cyan" id="modBStatusBadge">Early Screening</span>
+          </div>
+
+          <div class="modb-sections-grid">
+            <div class="modb-subblock">
+              <span class="modb-sub-title">1. Early Screening Inputs</span>
+              <div class="modb-row"><span>0h Baseline ($V_0$):</span> <strong id="mbV0">10.12 μA</strong></div>
+              <div class="modb-row"><span>24h Screening ($V_{24}$):</span> <strong id="mbV24">11.56 μA</strong></div>
+            </div>
+
+            <div class="modb-subblock">
+              <span class="modb-sub-title">2. Model Prognosis</span>
+              <div class="modb-row"><span>Predicted 168h:</span> <strong class="highlight-blue" id="mbPred168">34.82 μA</strong></div>
+              <div class="modb-row"><span>Predicted Drift:</span> <strong id="mbPredDrift">+24.70 μA</strong></div>
+              <div class="modb-row"><span>Predicted Rate:</span> <strong id="mbPredRate">0.1470 μA/h</strong></div>
+            </div>
+
+            <div class="modb-subblock">
+              <span class="modb-sub-title">3. Safety Envelope</span>
+              <div class="modb-row"><span>Safety Slope:</span> <strong>0.0371 μA/h</strong></div>
+              <div class="modb-row"><span>Slope Status:</span> <strong id="mbSlopeStatus" class="highlight-red">EXCEEDED</strong></div>
+              <div class="modb-row"><span>Risk Decision:</span> <strong id="mbRiskDecision" class="highlight-red">HIGH RISK</strong></div>
+            </div>
+
+            <div class="modb-subblock eval-subblock" id="mbEvalBlock">
+              <span class="modb-sub-title">4. Post-Burn-in Evaluation</span>
+              <div class="modb-row"><span>Actual 168h:</span> <strong id="mbActual168">33.40 μA</strong></div>
+              <div class="modb-row"><span>Prediction Error:</span> <strong id="mbPredError">1.42 μA</strong></div>
+              <div class="modb-eval-note" id="mbEvalNote">Actual 168h is ground-truth used only for evaluation, never as an inference input.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- QA Action Bar -->
+        <div class="qa-action-bar">
+          <button class="btn-danger" id="btnQuarantine">
+            Quarantine Component
+          </button>
+          <button class="btn-warning" id="btnExtendBurnin">Extend Burn-in +24h</button>
+          <button class="btn-success" id="btnApproveFlight">Approve for Assembly</button>
+        </div>
+      </section>
+
+    </div>
+
+  </main>
+
+  <footer class="app-footer">
+    <div class="footer-left">
+      <span>COMPASS &bull; Component Anomaly Screening and Surveillance &bull; SIH 260170 Prototype</span>
+    </div>
+    <div class="footer-right">
+      <span>Model-assisted QA decision support &bull; Fast-screening at 24h &bull; Zero Data Leakage Verified</span>
+    </div>
+  </footer>
+
+  <script src="/app.js"></script>
+</body>
+</html>

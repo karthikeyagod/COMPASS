@@ -1,0 +1,65 @@
+{
+  "module": "Safety Slope & Healthy Degradation Envelope",
+  "selected_method": "robust_tukey",
+  "calibrated_safety_slope_uA_per_h": 0.03707380952380952,
+  "method_selection_rationale": "Selected 'robust_tukey' (Q3 + 1.5 * IQR) from healthy training observations. Provides an empirical, distribution-free upper boundary that accommodates 99.7%+ of natural thermal burn-in kinetics without assuming strict normality, while immediately flagging accelerating sub-surface latent defect trajectories.",
+  "healthy_population_kinetics": {
+    "mean_drift_rate_uA_per_h": 0.012917,
+    "std_drift_rate_uA_per_h": 0.008665,
+    "median_drift_rate_uA_per_h": 0.012921,
+    "iqr_drift_rate_uA_per_h": 0.012083,
+    "p95_drift_rate_uA_per_h": 0.027299,
+    "p99_drift_rate_uA_per_h": 0.033398,
+    "p99_7_drift_rate_uA_per_h": 0.036976,
+    "robust_tukey_boundary_uA_per_h": 0.037074,
+    "gaussian_3sigma_boundary_uA_per_h": 0.038913
+  },
+  "boundary_candidates": {
+    "robust_tukey": 0.03707380952380952,
+    "percentile_99_7": 0.03697563261904768,
+    "percentile_99": 0.033397785714285706,
+    "gaussian_3sigma": 0.03891326742034005
+  },
+  "healthy_trajectory_envelope": {
+    "0": {
+      "mean": 10.137292050262854,
+      "median": 10.1294,
+      "upper_3sigma": 13.76166517377873,
+      "upper_tukey": 13.494074999999999,
+      "p99_7": 13.343684740000008
+    },
+    "24": {
+      "mean": 10.42209857674061,
+      "median": 10.4386,
+      "upper_3sigma": 14.33753735389562,
+      "upper_tukey": 14.049649999999998,
+      "p99_7": 13.95814076000001
+    },
+    "96": {
+      "mean": 11.35216199512758,
+      "median": 11.3385,
+      "upper_3sigma": 15.837410733077874,
+      "upper_tukey": 15.451874999999998,
+      "p99_7": 15.355404860000005
+    },
+    "168": {
+      "mean": 12.307430644954483,
+      "median": 12.2958,
+      "upper_3sigma": 18.004645062624377,
+      "upper_tukey": 17.42175,
+      "p99_7": 17.40018362
+    }
+  },
+  "test_set_evaluation": {
+    "total_test_components": 1770,
+    "true_defects": 146,
+    "true_positives_caught": 146,
+    "true_negatives_conforming": 1623,
+    "false_positives": 1,
+    "false_negatives": 0,
+    "recall": 1.0,
+    "precision": 0.993197,
+    "f1_score": 0.996587,
+    "escapes_eliminated_pct": 100.0
+  }
+}

@@ -1,0 +1,122 @@
+{
+  "dataset_name": "sih_260170_synthetic_ess_dataset.csv",
+  "evaluation_timestamp": "2026-08-30T22:41:36.867324",
+  "overall": {
+    "total_components": 12000,
+    "true_healthy_count": 10976,
+    "true_defect_count": 1024,
+    "confusion_matrix": {
+      "true_positives": 0,
+      "true_negatives": 10976,
+      "false_positives": 0,
+      "false_negatives": 1024
+    },
+    "classification_metrics": {
+      "accuracy": 0.914667,
+      "precision": 0.0,
+      "recall": 0.0,
+      "specificity": 1.0,
+      "f1_score": 0.0,
+      "false_negative_rate_fnr": 1.0,
+      "false_positive_rate_fpr": 0.0
+    },
+    "critical_sih_analysis": {
+      "screening_rule": "Value_168h_uA <= Datasheet_Leakage_Limit_uA -> PASS",
+      "datasheet_limit_uA": 50.0,
+      "max_defect_measurement_uA": 44.1954,
+      "latent_defects_missed_silent_escapes": 1024,
+      "latent_defects_caught": 0,
+      "silent_escape_rate_percent": 100.0,
+      "assessment": "TRADITIONAL STATIC LIMIT COMPLETE SCREENING FAILURE: 100% of latent defect ICs passed traditional screening because their degradation remained strictly below the static limit."
+    }
+  },
+  "splits": {
+    "train": {
+      "total_components": 8533,
+      "true_healthy_count": 7799,
+      "true_defect_count": 734,
+      "confusion_matrix": {
+        "true_positives": 0,
+        "true_negatives": 7799,
+        "false_positives": 0,
+        "false_negatives": 734
+      },
+      "classification_metrics": {
+        "accuracy": 0.913981,
+        "precision": 0.0,
+        "recall": 0.0,
+        "specificity": 1.0,
+        "f1_score": 0.0,
+        "false_negative_rate_fnr": 1.0,
+        "false_positive_rate_fpr": 0.0
+      },
+      "critical_sih_analysis": {
+        "screening_rule": "Value_168h_uA <= Datasheet_Leakage_Limit_uA -> PASS",
+        "datasheet_limit_uA": 50.0,
+        "max_defect_measurement_uA": 44.1954,
+        "latent_defects_missed_silent_escapes": 734,
+        "latent_defects_caught": 0,
+        "silent_escape_rate_percent": 100.0,
+        "assessment": "TRADITIONAL STATIC LIMIT COMPLETE SCREENING FAILURE: 100% of latent defect ICs passed traditional screening because their degradation remained strictly below the static limit."
+      }
+    },
+    "test": {
+      "total_components": 1770,
+      "true_healthy_count": 1624,
+      "true_defect_count": 146,
+      "confusion_matrix": {
+        "true_positives": 0,
+        "true_negatives": 1624,
+        "false_positives": 0,
+        "false_negatives": 146
+      },
+      "classification_metrics": {
+        "accuracy": 0.917514,
+        "precision": 0.0,
+        "recall": 0.0,
+        "specificity": 1.0,
+        "f1_score": 0.0,
+        "false_negative_rate_fnr": 1.0,
+        "false_positive_rate_fpr": 0.0
+      },
+      "critical_sih_analysis": {
+        "screening_rule": "Value_168h_uA <= Datasheet_Leakage_Limit_uA -> PASS",
+        "datasheet_limit_uA": 50.0,
+        "max_defect_measurement_uA": 41.4445,
+        "latent_defects_missed_silent_escapes": 146,
+        "latent_defects_caught": 0,
+        "silent_escape_rate_percent": 100.0,
+        "assessment": "TRADITIONAL STATIC LIMIT COMPLETE SCREENING FAILURE: 100% of latent defect ICs passed traditional screening because their degradation remained strictly below the static limit."
+      }
+    },
+    "validation": {
+      "total_components": 1697,
+      "true_healthy_count": 1553,
+      "true_defect_count": 144,
+      "confusion_matrix": {
+        "true_positives": 0,
+        "true_negatives": 1553,
+        "false_positives": 0,
+        "false_negatives": 144
+      },
+      "classification_metrics": {
+        "accuracy": 0.915144,
+        "precision": 0.0,
+        "recall": 0.0,
+        "specificity": 1.0,
+        "f1_score": 0.0,
+        "false_negative_rate_fnr": 1.0,
+        "false_positive_rate_fpr": 0.0
+      },
+      "critical_sih_analysis": {
+        "screening_rule": "Value_168h_uA <= Datasheet_Leakage_Limit_uA -> PASS",
+        "datasheet_limit_uA": 50.0,
+        "max_defect_measurement_uA": 40.5952,
+        "latent_defects_missed_silent_escapes": 144,
+        "latent_defects_caught": 0,
+        "silent_escape_rate_percent": 100.0,
+        "assessment": "TRADITIONAL STATIC LIMIT COMPLETE SCREENING FAILURE: 100% of latent defect ICs passed traditional screening because their degradation remained strictly below the static limit."
+      }
+    }
+  }
+}

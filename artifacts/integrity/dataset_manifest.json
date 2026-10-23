@@ -1,0 +1,9 @@
+{
+  "SIH_BENCHMARK_260170": {
+    "dataset_id": "SIH_BENCHMARK_260170",
+    "sha256": "f472142c612694161979c77764d568974fccaf2b33cf2a770a6dee4be99d96d7",
+    "schema_hash": "b6d30e39d1243151348c1bcfceccc9182758857684b7a668e8d330a8f9dc307c",
+    "row_count": 12000,
+    "registered_at": "2026-09-08T07:40:03.825006+00:00"
+  }
+}

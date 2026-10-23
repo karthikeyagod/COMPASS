@@ -1,0 +1,89 @@
+{
+  "module": "Module B - 168h Drift Prediction",
+  "champion_model_type": "gradient_boosting",
+  "library": "scikit-learn",
+  "hyperparameters": {
+    "n_estimators": 150,
+    "learning_rate": 0.08,
+    "max_depth": 4,
+    "random_state": 42
+  },
+  "selected_features": [
+    "Value_0h_uA",
+    "Value_24h_uA",
+    "Early_Drift_uA",
+    "Early_Drift_Rate_uA_per_h",
+    "Early_Percentage_Change",
+    "PropagationDelay_0h_ns",
+    "PropagationDelay_24h_ns",
+    "Early_Delay_Drift_ns",
+    "Early_Delay_Drift_Rate_ns_per_h",
+    "Early_Delay_Percentage_Change",
+    "Iddq_0h_mA",
+    "Iddq_24h_mA",
+    "Early_Iddq_Drift_mA",
+    "Early_Iddq_Percentage_Change",
+    "Value_24h_Robust_Z_Score",
+    "Early_Drift_Robust_Z_Score",
+    "Early_Drift_Rate_per_h_Robust_Z_Score",
+    "Early_Delay_Drift_Robust_Z_Score"
+  ],
+  "feature_count": 18,
+  "target_variable": "Value_168h_uA",
+  "primary_metric": "MAE (Mean Absolute Error)",
+  "model_selection_rationale": "Selected 'gradient_boosting' based strictly on validation split performance. Achieved lowest Validation MAE of 1.3335 \u03bcA and highest R\u00b2 of 0.8604.",
+  "validation_benchmark_comparison": {
+    "linear_regression": {
+      "model_type": "linear_regression",
+      "mae_uA": 1.664174,
+      "rmse_uA": 2.318728,
+      "r2_score": 0.776436,
+      "residuals": {
+        "mean_error": -0.01984,
+        "std_error": 2.318643,
+        "median_error": -0.073152,
+        "max_absolute_error": 16.536975,
+        "p95_absolute_error": 4.423638
+      }
+    },
+    "random_forest": {
+      "model_type": "random_forest",
+      "mae_uA": 1.334413,
+      "rmse_uA": 1.843204,
+      "r2_score": 0.85873,
+      "residuals": {
+        "mean_error": 0.001923,
+        "std_error": 1.843203,
+        "median_error": 0.005759,
+        "max_absolute_error": 18.612963,
+        "p95_absolute_error": 3.293901
+      }
+    },
+    "gradient_boosting": {
+      "model_type": "gradient_boosting",
+      "mae_uA": 1.333507,
+      "rmse_uA": 1.832528,
+      "r2_score": 0.860362,
+      "residuals": {
+        "mean_error": 0.016246,
+        "std_error": 1.832456,
+        "median_error": -0.007746,
+        "max_absolute_error": 16.239544,
+        "p95_absolute_error": 3.406623
+      }
+    }
+  },
+  "test_set_performance": {
+    "model_type": "gradient_boosting",
+    "mae_uA": 1.321766,
+    "rmse_uA": 1.809504,
+    "r2_score": 0.862439,
+    "residuals": {
+      "mean_error": -0.019105,
+      "std_error": 1.809403,
+      "median_error": -0.067663,
+      "max_absolute_error": 12.528057,
+      "p95_absolute_error": 3.329072
+    }
+  }
+}
